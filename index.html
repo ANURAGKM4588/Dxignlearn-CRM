@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dxign — Smart WhatsApp & Instagram Auto-Reply & 24h Follow-up</title>
+  <meta name="description" content="Context-aware WhatsApp & Instagram auto-reply and automatic 24-hour conversation-based follow-ups.">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- MINIMAL SMART HEADER -->
+  <header class="smart-header">
+    <div class="container header-inner">
+      <div class="brand-wrap">
+        <div class="brand-icon">D</div>
+        <div class="brand-text">
+          <h1>Dxign Auto-Reply & 24h Follow-up</h1>
+          <p>Context-Aware Inbound Understanding • 24h Auto Follow-up • 100% Free Plan</p>
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+        <!-- WhatsApp Status Badge -->
+        <div class="header-status">
+          <span class="pulse-dot"></span>
+          <span>WhatsApp: +91 7356413558</span>
+        </div>
+
+        <!-- Instagram Status Badge -->
+        <a href="https://www.instagram.com/dxign.learn" target="_blank" class="header-status" style="border-color: rgba(225,48,108,0.4); background: rgba(225,48,108,0.12); color: #fff; text-decoration: none;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--accent-ig);"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+          <span>@dxign.learn</span>
+        </a>
+
+        <button class="btn btn-sm btn-secondary" onclick="navigator.clipboard.writeText('https://wa.me/917356413558'); window.showToast('Copied WhatsApp: wa.me/917356413558', 'info');">
+          Copy WhatsApp
+        </button>
+
+        <button class="btn btn-sm btn-secondary" onclick="navigator.clipboard.writeText('https://www.instagram.com/dxign.learn'); window.showToast('Copied Instagram: @dxign.learn', 'info');">
+          Copy Instagram
+        </button>
+
+        <button class="btn btn-sm btn-wa" onclick="window.open('https://wa.me/917356413558?text=Hello%2C%20I%20saw%20your%20services%20and%20need%20more%20details', '_blank')">
+          Test Chat
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- MAIN 2-COLUMN GRID -->
+    <div class="smart-grid">
+
+      <!-- LEFT COLUMN: 24-HOUR FOLLOW-UPS & SERVICES CATALOG -->
+      <div>
+        <!-- 24-HOUR CONTEXTUAL FOLLOW-UPS ENGINE -->
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <h2 class="panel-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
+                24-Hour Follow-up Queue
+              </h2>
+              <div style="font-size: 0.76rem; color: var(--text-dim); margin-top: 2px;">
+                If client doesn't reply within 24h, a context-aware follow-up referencing their topic is triggered.
+              </div>
+            </div>
+            <span id="followup-count-badge" style="font-size: 0.74rem; font-weight: 700; color: var(--accent-wa); background: rgba(37,211,102,0.15); padding: 3px 8px; border-radius: 999px;"></span>
+          </div>
+
+          <div id="convo-list-container"></div>
+        </div>
+
+        <!-- MY SERVICES KNOWLEDGE BASE ("എന്റെ സർവീസ് ലിസ്റ്റ്") -->
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <h2 class="panel-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+                My Services & Pricing (Knowledge Base)
+              </h2>
+              <div style="font-size: 0.76rem; color: var(--text-dim); margin-top: 2px;">
+                The auto-reply bot reads incoming messages and matches these exact services and prices.
+              </div>
+            </div>
+            <button class="btn btn-sm btn-secondary" id="btn-toggle-new-service">+ Add Service</button>
+          </div>
+
+          <!-- Add new service form -->
+          <div id="box-add-service" style="display: none; background: rgba(0,0,0,0.35); padding: 16px; border-radius: var(--radius-md); margin-bottom: 16px; border: 1px solid var(--border-color);">
+            <div style="font-size: 0.88rem; font-weight: 700; color: #fff; margin-bottom: 10px;">Add Service to Auto-Responder</div>
+            <div class="form-group">
+              <label class="form-label">Service Name (e.g. AI Video Creation)</label>
+              <input type="text" id="ns-name" class="form-input" placeholder="Service name...">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Pricing / Rate (e.g. ₹3,500 per video, or ₹25,000 package)</label>
+              <input type="text" id="ns-price" class="form-input" placeholder="Price details...">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Inquiry Auto-Reply Text (what the bot should answer when asked about this)</label>
+              <textarea id="ns-reply" class="form-textarea" rows="2" placeholder="Hi! For AI Video Creation, our package includes..."></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">24-Hour Follow-up Message (sent if client does not reply in 24 hours)</label>
+              <textarea id="ns-followup" class="form-textarea" rows="2" placeholder="Hi sir, just following up regarding our AI Video pricing. Is the price okay for you?"></textarea>
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 8px;">
+              <button type="button" class="btn btn-sm btn-secondary" onclick="document.getElementById('box-add-service').style.display='none'">Cancel</button>
+              <button type="button" class="btn btn-sm btn-wa" id="btn-save-service">Save Service</button>
+            </div>
+          </div>
+
+          <div id="services-list-container"></div>
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN: LIVE CONVERSATION SIMULATOR & PHONE STATUS -->
+      <div>
+        <!-- CONNECTED BUSINESS CHANNELS -->
+        <div class="panel" style="border-color: rgba(37, 211, 102, 0.35); background: linear-gradient(135deg, rgba(37, 211, 102, 0.08), rgba(225, 48, 108, 0.05) 50%, #0f121a 100%);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <span style="font-size: 0.85rem; font-weight: 700; color: #fff;">Connected Channels</span>
+            <span style="font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: rgba(37,211,102,0.2); color: var(--accent-wa);">● 2 ACTIVE</span>
+          </div>
+
+          <!-- WhatsApp Line -->
+          <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(37,211,102,0.2); border-radius: var(--radius-md); padding: 10px 14px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between;">
+            <div>
+              <div style="font-size: 0.7rem; color: var(--accent-wa); font-weight: 700; text-transform: uppercase;">WhatsApp Primary Line</div>
+              <div style="font-size: 1.05rem; font-weight: 800; color: #fff; font-family: var(--font-mono);">+91 7356413558</div>
+            </div>
+            <div style="display: flex; gap: 6px;">
+              <button class="btn btn-sm btn-secondary" onclick="navigator.clipboard.writeText('https://wa.me/917356413558'); window.showToast('Copied: wa.me/917356413558', 'info');">Copy</button>
+              <button class="btn btn-sm btn-wa" onclick="window.open('https://wa.me/917356413558', '_blank')">Open</button>
+            </div>
+          </div>
+
+          <!-- Instagram Profile -->
+          <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(225,48,108,0.25); border-radius: var(--radius-md); padding: 10px 14px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
+            <div>
+              <div style="font-size: 0.7rem; color: var(--accent-ig); font-weight: 700; text-transform: uppercase;">Instagram Profile</div>
+              <div style="font-size: 1.05rem; font-weight: 800; color: #fff; font-family: var(--font-mono);">@dxign.learn</div>
+            </div>
+            <div style="display: flex; gap: 6px;">
+              <button class="btn btn-sm btn-secondary" onclick="navigator.clipboard.writeText('https://www.instagram.com/dxign.learn'); window.showToast('Copied: instagram.com/dxign.learn', 'info');">Copy</button>
+              <button class="btn btn-sm btn-secondary" onclick="window.open('https://www.instagram.com/dxign.learn', '_blank')" style="border-color: rgba(225,48,108,0.4); color: var(--accent-ig);">Visit</button>
+            </div>
+          </div>
+
+          <p style="font-size: 0.75rem; color: var(--text-muted); line-height: 1.4;">
+            When clients message from WhatsApp or Instagram, the auto-reply bot reads the inquiry and automatically arms a 24-hour follow-up timer.
+          </p>
+        </div>
+
+        <!-- INTERACTIVE LIVE INBOUND SIMULATOR -->
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <h2 class="panel-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+                Live Inbound Simulator
+              </h2>
+              <div style="font-size: 0.74rem; color: var(--text-dim); margin-top: 2px;">
+                Test incoming message (in English or Malayalam) to verify smart reply & 24h follow-up.
+              </div>
+            </div>
+            <span style="font-size: 0.72rem; color: var(--accent-wa); font-weight: 700;">● Live Bot</span>
+          </div>
+
+          <div class="sim-phone">
+            <div class="sim-header">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <div class="sim-avatar">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                </div>
+                <div>
+                  <div style="font-size: 0.85rem; font-weight: 700; color: #fff;" id="sim-active-contact">Client: +91 94471 23456</div>
+                  <div style="font-size: 0.7rem; color: var(--text-dim);">Chatting with +91 7356413558</div>
+                </div>
+              </div>
+
+              <!-- Quick Demo: Simulate 24 Hours Passing -->
+              <button class="btn btn-sm btn-secondary" id="btn-sim-fast-forward" title="Simulate 24 hours passing without client reply" style="font-size: 0.72rem; color: var(--accent-warning); border-color: rgba(245,158,11,0.3);">
+                Fast-Forward 24h ⏱
+              </button>
+            </div>
+
+            <!-- CHAT BUBBLES -->
+            <div class="sim-chat-area" id="sim-chat-area"></div>
+
+            <!-- INPUT FORM -->
+            <form id="sim-chat-form" class="sim-input-row">
+              <input type="text" id="sim-input-text" class="sim-input" placeholder="Ask: 'What is AI video price?' or 'video creation'">
+              <button type="submit" class="btn btn-sm btn-wa" style="border-radius: var(--radius-full); width: 34px; height: 34px; padding: 0;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+              </button>
+            </form>
+          </div>
+
+          <div style="display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap;">
+            <span style="font-size: 0.72rem; color: var(--text-dim);">Quick test prompts:</span>
+            <button class="btn btn-sm btn-secondary" onclick="window.testPrompt('AI video price ethranu?')" style="font-size: 0.72rem; padding: 2px 6px;">"AI video price?"</button>
+            <button class="btn btn-sm btn-secondary" onclick="window.testPrompt('Can you design a website for my business?')" style="font-size: 0.72rem; padding: 2px 6px;">"Website design?"</button>
+            <button class="btn btn-sm btn-secondary" onclick="window.testPrompt('I need social media ads management')" style="font-size: 0.72rem; padding: 2px 6px;">"Social media ads"</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="toast-container" class="toast-container"></div>
+
+  <script src="js/bundle.js"></script>
+</body>
+</html>
