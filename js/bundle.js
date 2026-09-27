@@ -332,17 +332,41 @@
   function analyzeInquiry(messageText) {
     const textLower = messageText.trim().toLowerCase();
 
+    // 0. Welcome Greeting / Menu Request
+    if (['hi', 'hello', 'hey', 'start', 'menu', 'options', 'help', 'ഹായ്', 'ഹലോ'].includes(textLower)) {
+      return {
+        id: 'srv-menu',
+        name: 'Welcome Suggestion Menu',
+        replyText: `✨ *Welcome to Dxign!* ✨\nHow can we help your business today?\n\nReply with a number to get instant details & pricing:\n[ 1 ] 🎬 AI Video Creation (Reels & Ads)\n[ 2 ] 🌐 Website & Web App Development\n[ 3 ] 📈 Social Media Ads & Lead Generation\n[ 4 ] 🎨 Branding & Logo Design\n[ 5 ] 📞 Speak directly with Anurag (+91 7356413558)\n[ 6 ] 📸 Instagram Profile (@dxign.learn)\n\n_Or simply reply in English or Malayalam with your question!_`,
+        followupText: 'Hi sir! Anurag from Dxign here. Just checking in to see if you have any questions regarding our services?'
+      };
+    }
+
     // 1. Check for number option matches (e.g. "1", "2", "option 1", "#1")
     const numMatch = textLower.match(/^[#]?(\d+)/);
     if (numMatch) {
       const idx = parseInt(numMatch[1], 10) - 1;
       if (idx >= 0 && idx < state.services.length) {
         return state.services[idx];
+      } else if (idx === 4 || textLower.includes('anurag')) {
+        return {
+          id: 'srv-direct',
+          name: 'Direct Founder Chat',
+          replyText: 'Hi! 😊 Anurag here from Dxign. I will be connecting with you directly in a few minutes. You can also call me directly at +91 7356413558.',
+          followupText: 'Hi! Anurag here from Dxign. Just following up to see if you had any questions regarding your project?'
+        };
+      } else if (idx === 5 || textLower.includes('insta') || textLower.includes('instagram')) {
+        return {
+          id: 'srv-instagram',
+          name: 'Instagram Profile',
+          replyText: '📸 *Dxign Instagram*: Visit https://www.instagram.com/dxign.learn to explore our latest creative projects, AI video samples, and designs!',
+          followupText: 'Hi! Did you have a chance to check out our Instagram portfolio at @dxign.learn? Let us know what project you have in mind!'
+        };
       }
     }
 
-    // 2. Check for "Talk to Anurag / Human"
-    if (textLower.includes('anurag') || textLower.includes('human') || textLower.includes('call') || textLower.includes('talk') || textLower.includes('direct')) {
+    // 2. Check for "Talk to Anurag / Human / Call"
+    if (textLower.includes('anurag') || textLower.includes('human') || textLower.includes('call') || textLower.includes('talk') || textLower.includes('direct') || textLower.includes('phone')) {
       return {
         id: 'srv-direct',
         name: 'Direct Founder Chat',
@@ -351,7 +375,17 @@
       };
     }
 
-    // 3. Check each service keywords
+    // 3. Check for Instagram
+    if (textLower.includes('insta') || textLower.includes('instagram') || textLower.includes('@dxign')) {
+      return {
+        id: 'srv-instagram',
+        name: 'Instagram Profile',
+        replyText: '📸 *Dxign Instagram*: Visit https://www.instagram.com/dxign.learn to explore our latest creative projects, AI video samples, and designs!',
+        followupText: 'Hi! Did you have a chance to check out our Instagram portfolio at @dxign.learn? Let us know what project you have in mind!'
+      };
+    }
+
+    // 4. Check each service keywords
     for (const srv of state.services) {
       for (const kw of srv.keywords) {
         if (textLower.includes(kw.toLowerCase())) {
@@ -369,7 +403,11 @@
     const container = document.getElementById('sim-suggestions-container');
     if (!container) return;
 
-    const chipsHtml = state.services.map((srv, idx) => {
+    const chipsHtml = `
+      <button type="button" class="suggestion-chip" onclick="window.sendSuggestionPrompt('Hi')">
+        <span>👋</span> "Hi" (Show Menu)
+      </button>
+    ` + state.services.map((srv, idx) => {
       const prompt = `Tell me about ${srv.name} pricing`;
       const icon = srv.name.toLowerCase().includes('video') ? '🎬' :
                    srv.name.toLowerCase().includes('web') ? '🌐' :
@@ -380,6 +418,9 @@
         </button>
       `;
     }).join('') + `
+      <button type="button" class="suggestion-chip" onclick="window.sendSuggestionPrompt('What is your Instagram?')">
+        <span>📸</span> Instagram
+      </button>
       <button type="button" class="suggestion-chip human" onclick="window.sendSuggestionPrompt('Can I talk to Anurag directly?')">
         <span>📞</span> Talk to Anurag
       </button>

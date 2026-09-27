@@ -106,23 +106,40 @@ async function connectToWhatsApp() {
       // 1. Analyze message: Check for greeting / menu request
       const textLower = text.toLowerCase().trim();
 
-      if (['hi', 'hello', 'hey', 'start', 'menu', 'options', 'help'].includes(textLower)) {
-        const menuReply = `Welcome to Dxign! ✨ How can we help your business today?\n\nReply with a number to get instant pricing:\n1️⃣ AI Video Creation\n2️⃣ Website Development\n3️⃣ Social Media Ads & Marketing\n4️⃣ Branding & Logo Design\n5️⃣ Talk to Anurag directly\n\nOr simply type what you need!`;
+      if (['hi', 'hello', 'hey', 'start', 'menu', 'options', 'help', 'ഹായ്', 'ഹലോ'].includes(textLower)) {
+        const menuReply = 
+`✨ *Welcome to Dxign!* ✨
+How can we help your business today?
+
+Reply with a number to get instant details & pricing:
+[ 1 ] 🎬 AI Video Creation (Reels & Ads)
+[ 2 ] 🌐 Website & Web App Development
+[ 3 ] 📈 Social Media Ads & Lead Generation
+[ 4 ] 🎨 Branding & Logo Design
+[ 5 ] 📞 Speak directly with Anurag (+91 7356413558)
+[ 6 ] 📸 Instagram Profile (@dxign.learn)
+
+_Or simply reply in English or Malayalam with your question!_`;
+
         await sock.sendMessage(senderJid, { text: menuReply });
         console.log(`[Sent Welcome Suggestion Menu to ${senderJid}]`);
         return;
       }
 
-      // 2. Check for numeric choice (e.g. 1, 2, 3, 4, 5)
+      // 2. Check for numeric choice (e.g. 1, 2, 3, 4, 5, 6)
       const numMatch = textLower.match(/^[#]?(\d+)/);
       let matchedService = null;
       if (numMatch) {
         const choice = parseInt(numMatch[1], 10);
         if (choice >= 1 && choice <= SERVICES.length) {
           matchedService = SERVICES[choice - 1];
-        } else if (choice === 5 || textLower.includes('anurag')) {
+        } else if (choice === 5 || textLower.includes('anurag') || textLower.includes('call') || textLower.includes('phone')) {
           const directReply = 'Hi! 😊 Anurag here from Dxign. I will be connecting with you directly in a few minutes. You can also call me directly at +91 7356413558.';
           await sock.sendMessage(senderJid, { text: directReply });
+          return;
+        } else if (choice === 6 || textLower.includes('insta') || textLower.includes('instagram')) {
+          const igReply = '📸 *Dxign Instagram*: Visit https://www.instagram.com/dxign.learn to explore our latest creative projects, AI video samples, and designs!';
+          await sock.sendMessage(senderJid, { text: igReply });
           return;
         }
       }
