@@ -1,0 +1,17 @@
+{
+  "name": "dxign-smart-crm",
+  "version": "1.0.0",
+  "description": "Dxign WhatsApp Smart Auto-Reply and 24h Follow-up Bot",
+  "type": "module",
+  "main": "whatsapp-bridge.js",
+  "scripts": {
+    "start": "node whatsapp-bridge.js"
+  },
+  "dependencies": {
+    "@hapi/boom": "^10.0.1",
+    "@whiskeysockets/baileys": "^6.7.9",
+    "pino": "^9.6.0",
+    "qrcode": "^1.5.4",
+    "qrcode-terminal": "^0.12.0"
+  }
+}

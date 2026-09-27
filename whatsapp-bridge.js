@@ -23,7 +23,9 @@
 
 import makeWASocket, { DisconnectReason, useMultiFileAuthState } from '@whiskeysockets/baileys';
 import qrcode from 'qrcode-terminal';
+import QRCode from 'qrcode';
 import { Boom } from '@hapi/boom';
+import pino from 'pino';
 
 export const CONNECTED_PHONE = '+917356413558';
 
@@ -63,7 +65,8 @@ async function connectToWhatsApp() {
 
   const sock = makeWASocket({
     auth: state,
-    printQRInTerminal: false
+    printQRInTerminal: false,
+    logger: pino({ level: 'silent' })
   });
 
   sock.ev.on('connection.update', (update) => {
@@ -75,6 +78,10 @@ async function connectToWhatsApp() {
       console.log('   (Open WhatsApp > Settings > Linked Devices > Link a Device)');
       console.log('======================================================\n');
       qrcode.generate(qr, { small: true });
+
+      QRCode.toFile('whatsapp_qr.png', qr, { width: 400, margin: 2 }, (err) => {
+        if (!err) console.log('📸 QR Code also saved as image: whatsapp_qr.png in your CRM folder!\n');
+      });
     }
 
     if (connection === 'close') {
