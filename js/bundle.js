@@ -240,10 +240,10 @@
     const container = document.getElementById('services-list-container');
     if (!container) return;
 
-    container.innerHTML = state.services.map(srv => `
+    container.innerHTML = state.services.map((srv, idx) => `
       <div class="service-item" data-id="${srv.id}">
         <div class="service-top">
-          <div class="service-name">${escapeHTML(srv.name)}</div>
+          <div class="service-name">${idx + 1}. ${escapeHTML(srv.name)}</div>
           <div class="service-price">${escapeHTML(srv.price)}</div>
         </div>
         <div class="service-desc">
@@ -252,12 +252,26 @@
         <div class="service-followup-preview">
           <strong style="color: var(--accent-warning);">24h Auto Follow-up:</strong> "${escapeHTML(srv.followupText)}"
         </div>
-        <div style="display: flex; justify-content: flex-end; margin-top: 8px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; border-top: 1px dashed rgba(255,255,255,0.08); padding-top: 8px;">
+          <button class="btn btn-sm btn-secondary" onclick="window.copyServiceWaLink('${srv.id}')" style="font-size: 0.72rem; color: var(--accent-wa); border-color: rgba(37,211,102,0.3);">
+            📋 Copy WhatsApp Link
+          </button>
           <button class="btn btn-sm btn-secondary" onclick="window.deleteService('${srv.id}')" style="color: var(--accent-danger); padding: 2px 6px;">Delete</button>
         </div>
       </div>
     `).join('');
+
+    renderSuggestionChips();
   }
+
+  window.copyServiceWaLink = function(srvId) {
+    const srv = state.services.find(s => s.id === srvId);
+    if (!srv) return;
+    const text = encodeURIComponent(`Hi Dxign, can you tell me more about ${srv.name} pricing?`);
+    const link = `https://wa.me/${MY_WHATSAPP}?text=${text}`;
+    navigator.clipboard.writeText(link);
+    window.showToast(`Copied WhatsApp suggestion link for "${srv.name}"!`, 'success');
+  };
 
   window.deleteService = function(id) {
     if (confirm('Delete this service from knowledge base?')) {
@@ -316,9 +330,28 @@
 
   // --- SMART INBOUND UNDERSTANDING (MATCHING EXACT SERVICE) ---
   function analyzeInquiry(messageText) {
-    const textLower = messageText.toLowerCase();
+    const textLower = messageText.trim().toLowerCase();
 
-    // Check each service keywords
+    // 1. Check for number option matches (e.g. "1", "2", "option 1", "#1")
+    const numMatch = textLower.match(/^[#]?(\d+)/);
+    if (numMatch) {
+      const idx = parseInt(numMatch[1], 10) - 1;
+      if (idx >= 0 && idx < state.services.length) {
+        return state.services[idx];
+      }
+    }
+
+    // 2. Check for "Talk to Anurag / Human"
+    if (textLower.includes('anurag') || textLower.includes('human') || textLower.includes('call') || textLower.includes('talk') || textLower.includes('direct')) {
+      return {
+        id: 'srv-direct',
+        name: 'Direct Founder Chat',
+        replyText: 'Hi! 😊 Anurag here from Dxign. I will be connecting with you directly in a few minutes. You can also call or voice note me anytime at +91 7356413558.',
+        followupText: 'Hi! Anurag here from Dxign. Just following up to see if you had any questions regarding your project?'
+      };
+    }
+
+    // 3. Check each service keywords
     for (const srv of state.services) {
       for (const kw of srv.keywords) {
         if (textLower.includes(kw.toLowerCase())) {
@@ -327,9 +360,41 @@
       }
     }
 
-    // Default to the first service if no exact keyword match
+    // Default to first service if no exact keyword match
     return state.services[0];
   }
+
+  // --- CLIENT-SIDE SUGGESTION CHIPS (WhatsApp Quick Buttons) ---
+  function renderSuggestionChips() {
+    const container = document.getElementById('sim-suggestions-container');
+    if (!container) return;
+
+    const chipsHtml = state.services.map((srv, idx) => {
+      const prompt = `Tell me about ${srv.name} pricing`;
+      const icon = srv.name.toLowerCase().includes('video') ? '🎬' :
+                   srv.name.toLowerCase().includes('web') ? '🌐' :
+                   srv.name.toLowerCase().includes('ad') ? '📈' : '✨';
+      return `
+        <button type="button" class="suggestion-chip" onclick="window.sendSuggestionPrompt('${escapeHTML(prompt)}')">
+          <span>${icon}</span> ${escapeHTML(srv.name)}
+        </button>
+      `;
+    }).join('') + `
+      <button type="button" class="suggestion-chip human" onclick="window.sendSuggestionPrompt('Can I talk to Anurag directly?')">
+        <span>📞</span> Talk to Anurag
+      </button>
+    `;
+
+    container.innerHTML = chipsHtml;
+  }
+
+  window.sendSuggestionPrompt = function(promptText) {
+    const input = document.getElementById('sim-input-text');
+    if (input) {
+      input.value = promptText;
+      document.getElementById('sim-chat-form').dispatchEvent(new Event('submit'));
+    }
+  };
 
   // --- LIVE SMARTPHONE SIMULATOR ---
   let simChat = [
@@ -428,6 +493,7 @@
     }
 
     renderSimChat();
+    renderSuggestionChips();
   }
 
   window.testPrompt = function(promptText) {

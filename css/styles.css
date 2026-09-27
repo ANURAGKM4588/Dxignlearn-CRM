@@ -459,6 +459,51 @@ body {
   border: 1px solid rgba(245, 158, 11, 0.4);
 }
 
+/* Client-Side Suggestion Message Chips */
+.sim-suggestions-row {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 8px 12px;
+  background: #0d1017;
+  border-top: 1px solid var(--border-color);
+  scrollbar-width: none;
+}
+.sim-suggestions-row::-webkit-scrollbar {
+  display: none;
+}
+
+.suggestion-chip {
+  background: rgba(37, 211, 102, 0.12);
+  border: 1px solid rgba(37, 211, 102, 0.3);
+  color: #fff;
+  border-radius: var(--radius-full);
+  padding: 5px 12px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.suggestion-chip:hover {
+  background: rgba(37, 211, 102, 0.25);
+  border-color: var(--accent-wa);
+  transform: translateY(-1px);
+}
+
+.suggestion-chip.human {
+  background: rgba(99, 102, 241, 0.12);
+  border-color: rgba(99, 102, 241, 0.3);
+}
+.suggestion-chip.human:hover {
+  background: rgba(99, 102, 241, 0.25);
+  border-color: var(--accent-primary);
+}
+
 .sim-input-row {
   padding: 10px 14px;
   background: #0f121a;

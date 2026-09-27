@@ -149,7 +149,31 @@
             </div>
           </div>
 
-          <p style="font-size: 0.75rem; color: var(--text-muted); line-height: 1.4;">
+          <!-- Client Suggestion Links (wa.me) for Bio / Website -->
+          <div style="margin-top: 14px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 12px;">
+            <div style="font-size: 0.72rem; color: #fff; font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between;">
+              <span>💡 Client Suggestion Buttons (1-Tap WhatsApp Links)</span>
+            </div>
+            <p style="font-size: 0.72rem; color: var(--text-dim); margin-bottom: 8px;">
+              Share these 1-tap links on your Instagram Bio or website. When a customer taps, WhatsApp opens with the question already typed:
+            </p>
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+              <button class="btn btn-sm btn-secondary" onclick="navigator.clipboard.writeText('https://wa.me/917356413558?text=Hi%20Dxign,%20can%20you%20share%20AI%20Video%20Creation%20pricing?'); window.showToast('Copied AI Video WhatsApp link!', 'success');" style="justify-content: space-between; font-size: 0.74rem;">
+                <span>🎬 "AI Video Pricing" Link</span>
+                <span style="color: var(--accent-wa); font-size: 0.7rem;">Copy Link 📋</span>
+              </button>
+              <button class="btn btn-sm btn-secondary" onclick="navigator.clipboard.writeText('https://wa.me/917356413558?text=Hi%20Dxign,%20I%20need%20a%20website%20development%20quote'); window.showToast('Copied Website quote link!', 'success');" style="justify-content: space-between; font-size: 0.74rem;">
+                <span>🌐 "Website Design" Link</span>
+                <span style="color: var(--accent-wa); font-size: 0.7rem;">Copy Link 📋</span>
+              </button>
+              <button class="btn btn-sm btn-secondary" onclick="navigator.clipboard.writeText('https://wa.me/917356413558?text=Hi%20Dxign,%20tell%20me%20about%20Ads%20management'); window.showToast('Copied Ads management link!', 'success');" style="justify-content: space-between; font-size: 0.74rem;">
+                <span>📈 "Social Media Ads" Link</span>
+                <span style="color: var(--accent-wa); font-size: 0.7rem;">Copy Link 📋</span>
+              </button>
+            </div>
+          </div>
+
+          <p style="font-size: 0.75rem; color: var(--text-muted); line-height: 1.4; margin-top: 10px;">
             When clients message from WhatsApp or Instagram, the auto-reply bot reads the inquiry and automatically arms a 24-hour follow-up timer.
           </p>
         </div>
@@ -190,9 +214,14 @@
             <!-- CHAT BUBBLES -->
             <div class="sim-chat-area" id="sim-chat-area"></div>
 
+            <!-- CLIENT-SIDE SUGGESTION CHIPS (WhatsApp Quick Buttons) -->
+            <div class="sim-suggestions-row" id="sim-suggestions-container">
+              <!-- Dynamically populated from your services -->
+            </div>
+
             <!-- INPUT FORM -->
             <form id="sim-chat-form" class="sim-input-row">
-              <input type="text" id="sim-input-text" class="sim-input" placeholder="Ask: 'What is AI video price?' or 'video creation'">
+              <input type="text" id="sim-input-text" class="sim-input" placeholder="Type or tap a suggestion chip above...">
               <button type="submit" class="btn btn-sm btn-wa" style="border-radius: var(--radius-full); width: 34px; height: 34px; padding: 0;">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
               </button>

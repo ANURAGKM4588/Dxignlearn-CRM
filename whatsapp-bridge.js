@@ -103,14 +103,42 @@ async function connectToWhatsApp() {
         conversationTimers.delete(senderJid);
       }
 
-      // Analyze message to match exact service
-      const textLower = text.toLowerCase();
-      let matchedService = SERVICES[0]; // Default
-      for (const srv of SERVICES) {
-        if (srv.keywords.some(kw => textLower.includes(kw))) {
-          matchedService = srv;
-          break;
+      // 1. Analyze message: Check for greeting / menu request
+      const textLower = text.toLowerCase().trim();
+
+      if (['hi', 'hello', 'hey', 'start', 'menu', 'options', 'help'].includes(textLower)) {
+        const menuReply = `Welcome to Dxign! ✨ How can we help your business today?\n\nReply with a number to get instant pricing:\n1️⃣ AI Video Creation\n2️⃣ Website Development\n3️⃣ Social Media Ads & Marketing\n4️⃣ Branding & Logo Design\n5️⃣ Talk to Anurag directly\n\nOr simply type what you need!`;
+        await sock.sendMessage(senderJid, { text: menuReply });
+        console.log(`[Sent Welcome Suggestion Menu to ${senderJid}]`);
+        return;
+      }
+
+      // 2. Check for numeric choice (e.g. 1, 2, 3, 4, 5)
+      const numMatch = textLower.match(/^[#]?(\d+)/);
+      let matchedService = null;
+      if (numMatch) {
+        const choice = parseInt(numMatch[1], 10);
+        if (choice >= 1 && choice <= SERVICES.length) {
+          matchedService = SERVICES[choice - 1];
+        } else if (choice === 5 || textLower.includes('anurag')) {
+          const directReply = 'Hi! 😊 Anurag here from Dxign. I will be connecting with you directly in a few minutes. You can also call me directly at +91 7356413558.';
+          await sock.sendMessage(senderJid, { text: directReply });
+          return;
         }
+      }
+
+      // 3. Match by service keywords
+      if (!matchedService) {
+        for (const srv of SERVICES) {
+          if (srv.keywords.some(kw => textLower.includes(kw))) {
+            matchedService = srv;
+            break;
+          }
+        }
+      }
+
+      if (!matchedService) {
+        matchedService = SERVICES[0]; // Default fallback
       }
 
       console.log(`[Service Matched]: ${matchedService.name}`);
