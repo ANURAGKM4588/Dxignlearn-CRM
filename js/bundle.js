@@ -93,10 +93,37 @@
     }
   }
 
-  function saveState() {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    } catch (e) {}
+  let automationEnabled = false; // Automation disabled as requested by user
+
+  window.toggleMasterAutomation = function() {
+    automationEnabled = !automationEnabled;
+    updateAutomationUI();
+    if (automationEnabled) {
+      window.showToast('✅ Automation RESUMED! Auto-replies and 24h follow-up timers are active.', 'success');
+    } else {
+      window.showToast('⏸ Automation DISABLED! System is in Standby mode.', 'info');
+    }
+  };
+
+  function updateAutomationUI() {
+    const btn = document.getElementById('btn-master-automation');
+    const dot = document.getElementById('automation-dot');
+    const txt = document.getElementById('automation-status-text');
+    if (!btn || !dot || !txt) return;
+
+    if (automationEnabled) {
+      btn.style.borderColor = 'rgba(37, 211, 102, 0.4)';
+      btn.style.background = 'rgba(37, 211, 102, 0.12)';
+      btn.style.color = 'var(--accent-wa)';
+      dot.style.background = 'var(--accent-wa)';
+      txt.textContent = 'Automation: ACTIVE ⚡';
+    } else {
+      btn.style.borderColor = 'rgba(245, 158, 11, 0.4)';
+      btn.style.background = 'rgba(245, 158, 11, 0.12)';
+      btn.style.color = '#fbbf24';
+      dot.style.background = '#f59e0b';
+      txt.textContent = 'Automation: PAUSED ⏸';
+    }
   }
 
   // --- RENDER 24-HOUR FOLLOW-UP QUEUE ---
@@ -470,6 +497,15 @@
 
         // 1. Client message arrives
         simChat.push({ sender: 'client', text });
+
+        // If automation is paused, do not auto-reply or arm timers
+        if (!automationEnabled) {
+          simChat.push({ sender: 'followup', text: '⏸ [Automation Paused]: Auto-replies and 24h timers are currently in Standby mode. Click "Automation: PAUSED ⏸" in the top bar to resume.' });
+          renderSimChat();
+          window.showToast('Automation is disabled (Standby mode).', 'info');
+          return;
+        }
+
         renderSimChat();
 
         // 2. System analyzes message against knowledge base
@@ -581,6 +617,7 @@
   // --- BOOTSTRAP ---
   document.addEventListener('DOMContentLoaded', () => {
     loadState();
+    updateAutomationUI();
     renderConversations();
     renderServices();
     setupServiceForm();

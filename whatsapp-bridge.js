@@ -28,6 +28,8 @@ import { Boom } from '@hapi/boom';
 import pino from 'pino';
 
 export const CONNECTED_PHONE = '+917356413558';
+// AUTOMATION MASTER SWITCH (Set to false to disable all auto-replies & follow-ups)
+export const AUTOMATION_ENABLED = false;
 
 // Knowledge Base of Services
 const SERVICES = [
@@ -59,6 +61,8 @@ const SERVICES = [
 
 // Active conversations with 24h follow-up timers
 const conversationTimers = new Map();
+// Message cache for Signal protocol PreKey retries
+const messageCache = new Map();
 
 async function connectToWhatsApp() {
   const { state, saveCreds } = await useMultiFileAuthState('auth_info_baileys');
@@ -66,8 +70,21 @@ async function connectToWhatsApp() {
   const sock = makeWASocket({
     auth: state,
     printQRInTerminal: false,
-    logger: pino({ level: 'silent' })
+    logger: pino({ level: 'silent' }),
+    markOnlineOnConnect: true,
+    syncFullHistory: false,
+    getMessage: async (key) => {
+      return messageCache.get(key.id) || { conversation: 'Welcome to Dxign!' };
+    }
   });
+
+  async function sendBotMessage(jid, text) {
+    const sent = await sock.sendMessage(jid, { text });
+    if (sent?.key?.id && sent?.message) {
+      messageCache.set(sent.key.id, sent.message);
+    }
+    return sent;
+  }
 
   sock.ev.on('connection.update', (update) => {
     const { connection, lastDisconnect, qr } = update;
@@ -103,6 +120,12 @@ async function connectToWhatsApp() {
 
       console.log(`\n[Incoming Message from ${senderJid}]: "${text}"`);
 
+      // Check if automation is disabled
+      if (!AUTOMATION_ENABLED) {
+        console.log(`[Automation Disabled]: Received "${text}" from ${senderJid} -> No auto-reply sent (Bot is in standby mode).`);
+        return;
+      }
+
       // If client replied, cancel any pending 24h follow-up
       if (conversationTimers.has(senderJid)) {
         console.log(`[Client Replied]: Clearing pending 24h follow-up for ${senderJid}`);
@@ -128,7 +151,7 @@ Reply with a number to get instant details & pricing:
 
 _Or simply reply in English or Malayalam with your question!_`;
 
-        await sock.sendMessage(senderJid, { text: menuReply });
+        await sendBotMessage(senderJid, menuReply);
         console.log(`[Sent Welcome Suggestion Menu to ${senderJid}]`);
         return;
       }
@@ -142,11 +165,11 @@ _Or simply reply in English or Malayalam with your question!_`;
           matchedService = SERVICES[choice - 1];
         } else if (choice === 5 || textLower.includes('anurag') || textLower.includes('call') || textLower.includes('phone')) {
           const directReply = 'Hi! 😊 Anurag here from Dxign. I will be connecting with you directly in a few minutes. You can also call me directly at +91 7356413558.';
-          await sock.sendMessage(senderJid, { text: directReply });
+          await sendBotMessage(senderJid, directReply);
           return;
         } else if (choice === 6 || textLower.includes('insta') || textLower.includes('instagram')) {
           const igReply = '📸 *Dxign Instagram*: Visit https://www.instagram.com/dxign.learn to explore our latest creative projects, AI video samples, and designs!';
-          await sock.sendMessage(senderJid, { text: igReply });
+          await sendBotMessage(senderJid, igReply);
           return;
         }
       }
@@ -169,7 +192,7 @@ _Or simply reply in English or Malayalam with your question!_`;
       console.log(`[Sending Service Reply]: "${matchedService.reply.slice(0, 60)}..."`);
 
       // 1. Send immediate service details & pricing
-      await sock.sendMessage(senderJid, { text: matchedService.reply });
+      await sendBotMessage(senderJid, matchedService.reply);
 
       // 2. Arm 24-hour follow-up timer (24 hours = 86,400,000 ms)
       const followUpDelay = 24 * 60 * 60 * 1000;
@@ -178,7 +201,7 @@ _Or simply reply in English or Malayalam with your question!_`;
       const timer = setTimeout(async () => {
         try {
           console.log(`\n[24 Hours Elapsed]: No reply from ${senderJid}. Sending context follow-up...`);
-          await sock.sendMessage(senderJid, { text: matchedService.followup });
+          await sendBotMessage(senderJid, matchedService.followup);
           console.log(`[24h Context Follow-up Sent]: "${matchedService.followup}"`);
         } catch (err) {
           console.error('Failed to send 24h follow-up:', err);
